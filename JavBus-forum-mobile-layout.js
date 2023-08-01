@@ -1,8 +1,9 @@
 // ==UserScript==
 // @name         JavBus论坛移动端界面适配
-// @namespace    https://github.com/Steven-Fake/JavBus-forum-mobileLayout
+// @namespace    https://github.com/Steven-Fake/JavBus-forum-mobile-layout
 // @homepageURL  https://sleazyfork.org/zh-CN/users/1140711-steven-fake
 // @version      1.0
+// @license      MIT
 // @description  使司机社(JavBus)的论坛适应移动端界面
 // @author       Steven-Fake
 // @icon         https://www.javbus.com/favicon.ico
@@ -116,7 +117,7 @@
                     }
                 }
             }
-        };
+        }
 
         //调整帖子和回复中的图片尺寸
         if (pageType == "post") {
