@@ -2,7 +2,7 @@
 // @name         JavBus论坛移动端界面适配
 // @namespace    https://github.com/Steven-Fake/JavBus-forum-mobile-layout
 // @homepageURL  https://sleazyfork.org/zh-CN/users/1140711-steven-fake
-// @version      1.1
+// @version      1.1.1
 // @license      MIT
 // @description  使司机社(JavBus)的论坛适应移动端界面
 // @author       Steven-Fake
@@ -30,7 +30,7 @@
     //使用adjust变量来判断是否需要调整为移动端布局，并添加监听事件
     const adjust = window.innerHeight > window.innerWidth && window.innerWidth < 1600;
     if (adjust) {
-        console.log("JavBus论坛手机界面适配v1.1: 启用移动端布局");
+        console.log("JavBus论坛移动端界面适配v1.1.1: 启用移动端布局");
         const pageType = ((url) => {
             if (url.includes("tid=")) {
                 return "post";
@@ -56,14 +56,21 @@
         * 2. 删除本就隐藏的元素
         * */
         if (pageType !== "search") {
-            //1.移除顶部广告
-            document.getElementsByClassName("bcpic2")[0].remove();
-            //2.删除本就隐藏的元素
-            document.getElementById("myprompt_menu").remove();
-            document.getElementById("myitem_menu").remove();
-            document.getElementById("qmenu_menu").remove();
-            document.getElementsByClassName("wp cl")[0].remove();
-
+            try {
+                //1.移除顶部广告
+                document.getElementsByClassName("bcpic2")[0].remove();
+            } catch (e) {
+                console.log("JavBus论坛移动端界面适配v1.1.1: 尝试移除顶部广告时出错。");
+            }
+            try {
+                //2.删除本就隐藏的元素
+                document.getElementById("myprompt_menu").remove();
+                document.getElementById("myitem_menu").remove();
+                document.getElementById("qmenu_menu").remove();
+                document.getElementsByClassName("wp cl")[0].remove();
+            } catch (e) {
+                console.log("JavBus论坛移动端界面适配v1.1.1: 尝试删除无用元素时出错。");
+            }
         }
 
         /* 调整顶栏
@@ -276,7 +283,7 @@
             footer.firstElementChild.style.padding = "10px";
         }
     } else {
-        let tip = "JavBus论坛手机界面适配v1.1: 未启用移动端布局，原因: ";
+        let tip = "JavBus论坛移动端界面适配v: 未启用移动端布局，原因: ";
         if (window.innerWidth >= 1600) {
             if (window.innerWidth >= window.innerHeight) {
                 console.log(tip + "当前屏幕宽度大于1600px, 且不为竖屏。");
