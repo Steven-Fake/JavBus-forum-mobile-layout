@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         JavBus论坛移动端界面适配
-// @namespace    https://github.com/Steven-Fake/JavBus-forum-mobile-layout
-// @homepageURL  https://sleazyfork.org/zh-CN/users/1140711-steven-fake
-// @version      1.1.2
+// @namespace    https://sleazyfork.org/zh-CN/users/1140711-steven-fake
+// @homepageURL  https://github.com/Steven-Fake/JavBus-forum-mobile-layout
+// @version      1.1.3
 // @license      MIT
 // @description  使司机社(JavBus)的论坛适应移动端界面
 // @author       Steven-Fake
@@ -30,7 +30,7 @@
     //使用adjust变量来判断是否需要调整为移动端布局，并添加监听事件
     const adjust = window.innerHeight > window.innerWidth && window.innerWidth < 1600;
     if (adjust) {
-        console.log("JavBus论坛移动端界面适配v1.1.2: 启用移动端布局");
+        console.log("JavBus论坛移动端界面适配v1.1.3: 启用移动端布局");
         const pageType = ((url) => {
             if (url.includes("tid=")) {
                 return "post";
@@ -60,14 +60,14 @@
                 //1.移除顶部广告
                 document.getElementsByClassName("bcpic2")[0].remove();
             } catch (e) {
-                console.log("JavBus论坛移动端界面适配v1.1.2: 尝试移除顶部广告时出错。");
+                console.log("JavBus论坛移动端界面适配v1.1.3: 尝试移除顶部广告时出错。");
             }
             try {
                 //2.删除本就隐藏的元素
                 document.getElementsByClassName("wp cl")[0].remove();
             } catch (e) {
                 console.log(e);
-                console.log("JavBus论坛移动端界面适配v1.1.2: 尝试删除隐藏元素时出错。");
+                console.log("JavBus论坛移动端界面适配v1.1.3: 尝试删除隐藏元素时出错。");
             }
         }
 

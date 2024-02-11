@@ -2,15 +2,19 @@
 
 > 使司机社(JavBus)的论坛适应移动端界面的Tampermonkey脚本
 
+## 效果
+
+|Before|After|
+|:----:|:---:|
+|![before](https://i.mji.rip/2023/08/01/cd00c10b419cc7577f081f54bc7e9475.png)|![after](https://i.mji.rip/2023/08/01/dd645dd5ac87f2b000cd5d25d3ede18b.png)|
+
 ## 使用方法
 
-1. 首先确保使用的浏览器支持安装插件(如安卓的[Kiwi Browser](https://kiwibrowser.com/))
-   ，且已安装[Tampermonkey](https://www.tampermonkey.net/)或其他同类插件管理器
-2. 转到Sleazy
-   Fork的脚本页面：[JavBus论坛移动端界面适配](https://sleazyfork.org/zh-CN/scripts/472169-javbus%E8%AE%BA%E5%9D%9B%E7%A7%BB%E5%8A%A8%E7%AB%AF%E7%95%8C%E9%9D%A2%E9%80%82%E9%85%8D)
+1. 首先确保使用的浏览器支持安装插件(如安卓的[Kiwi Browser](https://kiwibrowser.com/))，且已安装[Tampermonkey](https://www.tampermonkey.net/)或其他同类插件管理器。
+2. 转到Sleazy Fork的脚本页面：[JavBus论坛移动端界面适配](https://sleazyfork.org/zh-CN/scripts/472169-javbus论坛移动端界面适配)
 3. 点击“安装此脚本”按钮
 4. 在弹出窗口点击“安装”按钮
-5. 完成，以更适合移动端的布局逛论坛吧
+5. 完成，以更移动端布局逛论坛吧
 
 ## 更新日志
 
@@ -31,3 +35,7 @@
 ### 2024-01-26 v1.1.2
 
 * 修复了先前版本中删除元素过多导致的异常问题(依据奥卡姆剃刀法则，不影响界面效果的元素不应当尝试修改)
+
+### 2024-02-11 v1.1.3
+
+* 修复了JS脚本的元信息中@namespace和@homepageURL字段的错误，以实现追踪更新。
