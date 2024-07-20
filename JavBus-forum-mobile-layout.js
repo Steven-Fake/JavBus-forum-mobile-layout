@@ -2,7 +2,7 @@
 // @name         JavBus论坛移动端界面适配
 // @namespace    https://sleazyfork.org/zh-CN/users/1140711-steven-fake
 // @homepageURL  https://github.com/Steven-Fake/JavBus-forum-mobile-layout
-// @version      1.2.0
+// @version      1.3
 // @license      MIT
 // @description  使司机社(JavBus)的论坛适应移动端界面
 // @author       Steven-Fake
@@ -25,25 +25,27 @@
 // @grant        none
 // ==/UserScript==
 
-//页面枚举类型
-PageType = {
-    Post: 0, // 帖子页面
-    Profile: 1, // 个人信息页面
-    Login: 2, // 登录页面
+PAGE = {//页面枚举类型
+    Index: 0, // 首页
+    SubForum: 1, // 子版块页面
+    Post: 2, // 帖子页面
     Search: 3, // 搜索页面
-    Index: 4, // 首页
-    Favorite: 5 // 收藏页面
+    Favorite: 4, // 收藏页面
+    Profile: 5, // 个人信息页面
+    Login: 6, // 登录页面
+    Unknown: -1 // 未知，或未适配的页面
 }
-Object.freeze(PageType); //冻结枚举类型
+const VERSION = "1.3"
+const SLEAZYFORK = "https://sleazyfork.org/zh-CN/scripts/472169-javbus论坛移动端界面适配"; // 脚本主页
 
 /**
  * 是否启用移动端布局
  * @returns {boolean}
  */
-function enable() {
+const ifEnable = () => {
     const status = window.innerHeight > window.innerWidth && window.innerWidth <= 1600;
     if (!status) {
-        const info = "JavBus论坛移动端界面适配v: 未启用移动端布局，原因: ";
+        const info = `JavBus论坛移动端界面适配 v${VERSION}: 未启用移动端布局，原因: `;
         if (window.innerWidth > 1600) {
             if (window.innerWidth >= window.innerHeight) console.log(info + "当前屏幕宽度大于1600px, 且不为竖屏。");
             else console.log(info + "当前屏幕宽度大于1600px。");
@@ -53,23 +55,59 @@ function enable() {
         }
         console.log("width:", window.innerWidth, "height:", window.innerHeight);
     } else {
-        console.log("JavBus论坛移动端界面适配v1.2.1: 启用移动端布局");
+        console.log(`JavBus论坛移动端界面适配 v${VERSION}: 启用移动端布局`);
     }
     return status;
 }
 
 /**
  * 获取当前页面的类型
- * @returns {PageType}
+ * @returns {PAGE}
  */
 function getPageType() {
     const url = window.location.href;
-    if (url.includes("tid=")) return PageType.Post;
-    else if (url.includes("uid=")) return PageType.Profile;
-    else if (url.includes("action=login")) return PageType.Login;
-    else if (url.includes("search.php")) return PageType.Search;
-    else if (url.includes("do=favorite")) return PageType.Favorite;
-    else return PageType.Index;
+    const indexRegex = /^.+\/forum(\.php)?([\/?])?$/; // 相当于只匹配['/forum', '/forum/', '/forum?']，不允许子路径和任何get参数
+    if (url.match(indexRegex)) return PAGE.Index;
+    else if (url.includes("gid=")) return PAGE.Index;
+    else if (url.includes("tid=")) return PAGE.Post;
+    else if (url.includes("fid=")) return PAGE.SubForum;
+    else if (url.includes("uid=")) return PAGE.Profile;
+    else if (url.includes("action=login")) return PAGE.Login;
+    else if (url.includes("search.php")) return PAGE.Search;
+    else if (url.includes("do=favorite")) return PAGE.Favorite;
+    else return PAGE.Unknown;
+}
+
+
+function getFeedbackInfo(e) {
+    if (e) {
+        return `
+        Version: ${VERSION}
+        URL    : ${window.location.href}
+        UA     : ${navigator.userAgent}
+        Error  : 
+            ${e.name} - ${e.message}
+        `
+    } else {
+        return `
+        Version: ${VERSION}
+        URL    : ${window.location.href}
+        UA     : ${navigator.userAgent}
+        `
+    }
+}
+
+/**
+ * 对于出错的页面是否进行反馈
+ */
+function copyFeedbackToClipboard(e) {
+    try {
+        window.focus();
+        navigator.clipboard.writeText(getFeedbackInfo(e));
+        return true;
+    } catch (error) {
+        return false;
+    }
 }
 
 /**
@@ -84,25 +122,44 @@ class Layout {
         document.head.appendChild(meta);
 
         this.pageType = getPageType();
-        // 通用规则
-        if (this.pageType !== PageType.Search) {
-            this.mainWrapper = document.getElementById("wp");
+
+        if (this.pageType === PAGE.Unknown) { // 未适配的页面
+            if ("Notification" in window) { // 当前环境存在Notification API
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        const notification = new Notification("JavBus论坛移动端界面适配 v" + VERSION, {
+                            body: copyFeedbackToClipboard() ? "尚未适配当前页面，已复制相关信息到剪贴板，点击可进行反馈。" : "尚未适配当前页面，点击可进行反馈。",
+                            icon: "https://www.javbus.com/favicon.ico"
+                        });
+                        notification.onclick = () => {
+                            window.open(`${SLEAZYFORK}/feedback`)
+                        };
+                    } // 用户拒绝了通知权限请求
+                });
+            } else {
+                console.log("JavBus论坛移动端界面适配 v" + VERSION + ": 未适配当前页面")
+            }
+            return;
+        } else if (this.pageType !== PAGE.Search) { // 执行通用规则，但搜索页面不适用
+            this.mainWrapper = document.querySelector("#wp");
             this.mainContainer = document.querySelector(".mn");
             this.basic(); // 应用页面的全局调整
             this.topBar(); // 调整顶栏
         }
         // 各页面的规则
-        if (this.pageType === PageType.Index) {
+        if (this.pageType === PAGE.Index) {
             this.index(); // 调整首页
-        } else if (this.pageType === PageType.Search) {
+        } else if (this.pageType === PAGE.SubForum) {
+            this.subForum(); // 调整子版块页面
+        } else if (this.pageType === PAGE.Search) {
             this.search(); // 调整搜索页面
-        } else if (this.pageType === PageType.Profile) {
+        } else if (this.pageType === PAGE.Profile) {
             this.profile(); // 调整个人信息页面
-        } else if (this.pageType === PageType.Post) {
+        } else if (this.pageType === PAGE.Post) {
             this.post(); // 调整帖子页面
-        } else if (this.pageType === PageType.Login) {
+        } else if (this.pageType === PAGE.Login) {
             this.login(); // 调整登录页面
-        } else if (this.pageType === PageType.Favorite) {
+        } else if (this.pageType === PAGE.Favorite) {
             this.favorite(); // 调整收藏页面
         }
     }
@@ -115,7 +172,7 @@ class Layout {
         document.querySelectorAll(".bcpic2").forEach(ad => ad.remove());
 
         // 2.删除本就隐藏的元素
-        document.querySelector("div.wp.cl").remove();
+        document.querySelector("div.wp.cl")?.remove();
 
         // 3.调整层级导航栏的样式
         document.querySelectorAll("div.z").forEach(e => e.style.cssText = "width: 100%; padding: 0;");
@@ -155,19 +212,20 @@ class Layout {
         const nav = document.getElementById("toptb");
         if (!nav) return;
         // 1. 删除logo
-        nav.querySelector('a.jav-logo').remove();
+        nav.querySelector('a.jav-logo')?.remove();
         // 2. 调整导航栏样式
-        nav.style.cssText = "width: 100%; padding: 0;";
+        nav.style.cssText = "min-width: unset; width: 100%; padding: 0;";
         // 3. 移除原有搜索框和导航栏
-        nav.querySelector('div.wp').remove(); // 移除搜索框和导航栏
+        nav.querySelector('div.wp')?.remove(); // 移除搜索框和导航栏
         // 4. 调整个人信息部分
         const member = nav.querySelector('div.login-wrap.y');
         // 4.1 移除ID以节省空间
-        member.querySelector('span.member-name').remove();
+        member.querySelector('span.member-name')?.remove();
         // 4.2 个人头像改为左对齐
         member.style.cssText = "float: left;";
         // 4.3 将下拉菜单搬出来
         const menu = document.createElement('ul');
+        menu.style.cssText = "display: flex; justify-content: left; align-items: center;"
         member.querySelectorAll('div.menu-body div.item a').forEach(e => {
             const li = document.createElement('li');
             li.style.cssText = "float: none; display: inline-block; margin: 0 5px;";
@@ -177,15 +235,15 @@ class Layout {
         });
         nav.appendChild(menu);
         // 4.4 删掉menu的第一个元素(快捷导航)
-        menu.firstElementChild.remove();
+        menu.firstElementChild?.remove();
         // 4.5 删掉原本的下拉按钮和下拉菜单
-        member.querySelector('span.angle').remove();
-        member.querySelector('div.menu-body').remove();
+        member.querySelector('span.angle')?.remove();
+        member.querySelector('div.menu-body')?.remove();
     }
 
 
     /**
-     * 首页(javbus.com/forum/)
+     * 首页(javbus.com/forum/ 或 javbus.com/forum/forum.php?gid=1)
      */
     index() {
         if (!this.mainContainer) return;
@@ -204,7 +262,7 @@ class Layout {
         for (let sideMenu of postLists) {
             for (let item of sideMenu.children) {
                 item.style.width = "100%";
-                item.firstElementChild.remove(); // 删除发帖用户的名称
+                item.firstElementChild?.remove(); // 删除发帖用户的名称
             }
         }
 
@@ -246,6 +304,64 @@ class Layout {
     }
 
     /**
+     * 子版块页面(javbus.com/forum.php?mod=forumdisplay&fid=)
+     */
+    subForum() {
+        // 1. 调整子版块标题的样式
+        const titleBlock = document.querySelector("div.forumbky");
+        if (titleBlock) titleBlock.style.cssText = "width: 100%; padding: 0;";
+
+        const main = document.querySelector("div#threadlist");
+        if (!main) return;
+
+        // 2. 调整顶栏的筛选框和排序框
+        main.querySelector("div.th table").style.cssText = "display: flex; justify-content: space-between; width: 100%;";
+
+        // 3. 调整各条目的宽度
+        const itemTable = main.querySelector("table#threadlisttableid");
+        if (itemTable) {
+            itemTable.style.cssText = "width: 100%"
+            itemTable.querySelectorAll("tbody").forEach(
+                tbody => {
+                    tbody.style.cssText = "width: 100%; min-width: 0; padding: 0;"
+                    tbody.querySelectorAll("th").forEach(e => e.style.cssText = "width: 100%;")
+                    tbody.querySelectorAll("div.post_inforight").forEach(e => e.style.cssText = "display:flex; flex-direction: column; width: 100%")
+                    tbody.querySelectorAll("div.post_infolist").forEach(e => e.style.cssText = "width: 100%;")
+                    tbody.querySelectorAll("div.post_infolist_other").forEach(e => e.style.cssText = "display:flex;flex-direction: column;")
+                }
+            )
+        }
+
+        // 4.“精选内容”与“精选主题”
+        const sidebar = this.mainWrapper.querySelector("div.sd.sd_allbox");
+        sidebar.style.cssText = "width: 100%; min-width: 0;";
+        sidebar.querySelectorAll("div.main-right-box.cl").forEach(e => e.style.cssText = "width: 100%; min-width: 0; padding: 0;"); // 调整每个帖子的样式
+        // “精选内容”
+        const choiceContent = sidebar.querySelector("ul.main-right-kuaixu.cl");
+        if (choiceContent) {
+            choiceContent.querySelectorAll("li").forEach(e => {
+                // 调整“精选内容”每个li的宽度
+                e.style.width = "100%";
+                // 调整图片和标题的宽度
+                e.querySelectorAll("div").forEach(e => e.style.width = "50%");
+            });
+        }
+        // “精选主题”
+        const choiceTheme = sidebar.querySelector("div.main-right-zuixin");
+        if (choiceTheme) {
+            choiceTheme.querySelectorAll("li").forEach(e => {
+                // 调整“精选内容”每个li的宽度
+                e.style.width = "100%";
+                // 显示完整标题
+                const title = e.querySelector("p.comment-post a");
+                title.textContent = title.title;
+                // 调整表格宽度
+                e.querySelector("table").style.width = "100%";
+            });
+        }
+    }
+
+    /**
      * 帖子页面(javbus.com/forum.php?mod=viewthread&tid=)
      */
     post() {
@@ -266,23 +382,27 @@ class Layout {
         sidebar.querySelectorAll("div.main-right-box.cl").forEach(e => e.style.cssText = "width: 100%; min-width: 0; padding: 0;"); // 调整每个帖子的样式
         // “精选内容”
         const choiceContent = sidebar.querySelector("ul.main-right-kuaixu.cl");
-        choiceContent.querySelectorAll("li").forEach(e => {
-            // 调整“精选内容”每个li的宽度
-            e.style.width = "100%";
-            // 调整图片和标题的宽度
-            e.querySelectorAll("div").forEach(e => e.style.width = "50%");
-        });
+        if (choiceContent) {
+            choiceContent.querySelectorAll("li").forEach(e => {
+                // 调整“精选内容”每个li的宽度
+                e.style.width = "100%";
+                // 调整图片和标题的宽度
+                e.querySelectorAll("div").forEach(e => e.style.width = "50%");
+            });
+        }
         // “精选主题”
         const choiceTheme = sidebar.querySelector("div.main-right-zuixin");
-        choiceTheme.querySelectorAll("li").forEach(e => {
-            // 调整“精选内容”每个li的宽度
-            e.style.width = "100%";
-            // 显示完整标题
-            const title = e.querySelector("p.comment-post a");
-            title.textContent = title.title;
-            // 调整表格宽度
-            e.querySelector("table").style.width = "100%";
-        });
+        if (choiceTheme) {
+            choiceTheme.querySelectorAll("li").forEach(e => {
+                // 调整“精选内容”每个li的宽度
+                e.style.width = "100%";
+                // 显示完整标题
+                const title = e.querySelector("p.comment-post a");
+                title.textContent = title.title;
+                // 调整表格宽度
+                e.querySelector("table").style.width = "100%";
+            });
+        }
     }
 
     /**
@@ -384,8 +504,12 @@ class Layout {
 
 (function () {
     'use strict';
+    if (!ifEnable()) return;
 
-    if (!enable()) return;
-
-    new Layout();
+    try {
+        new Layout(); // 开始调整布局
+    } catch (e) {
+        console.error("JavBus论坛移动端界面适配 v" + VERSION + ": 页面适配时出现错误", e);
+        // feedback(e);
+    }
 })();

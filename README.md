@@ -4,17 +4,18 @@
 
 ## 效果
 
-|  页面   |                                           原始效果                                           |                                          修改后效果                                           |
-|:-----:|:----------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------:|
-|  首页   |  ![index-original](https://i2.mjj.rip/2024/06/09/1a9a62ac37f5bdb717b079e9485c0e00.png)   |  ![index-modified](https://i2.mjj.rip/2024/06/09/28db0cd029ba2981549459ceb9c15cf1.png)   |
-|  帖子页  |   ![post-original](https://i2.mjj.rip/2024/06/09/680ba5614763c3892fc8a428b6f7882b.png)   |   ![post-modified](https://i2.mjj.rip/2024/06/09/c20a7c4409955b35ef9c6e6891bb2bda.png)   |
-|  搜索页  |  ![search-original](https://i2.mjj.rip/2024/06/09/1c44aefa234a154cd35e2ed6a1e08919.png)  |  ![search-modified](https://i2.mjj.rip/2024/06/09/34abe7d69aab99b2154f9358b85cb1ec.png)  |
-| 个人信息页 | ![profile-original](https://i2.mjj.rip/2024/06/09/a38614bcea66a901ea12108bb9decbb4.png)  | ![profile-modified](https://i2.mjj.rip/2024/06/09/6bbfb55ad33f342da511fe1930f30379.png)  |
-|  收藏页  | ![favorite-original](https://i2.mjj.rip/2024/06/09/b0c7490064452260fcc8288d552d42b4.png) | ![favorite-modified](https://i2.mjj.rip/2024/06/09/8209f2e6e656772f15d419423d7cf002.png) |
+|  页面   |                                           原始效果                                           |                                              修改后效果                                              |
+|:-----:|:----------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------:|
+|  首页   |  ![index-original](https://i2.mjj.rip/2024/06/09/1a9a62ac37f5bdb717b079e9485c0e00.png)   |      ![index-modified](https://i2.mjj.rip/2024/06/09/28db0cd029ba2981549459ceb9c15cf1.png)      |
+| 子版块页  | ![subforum-original](https://i.mij.rip/2024/07/20/6b0bee4d0305e8f5b2441bec7f2932c5.jpeg) | ![subforum-modified](https://ice.frostsky.com/2024/07/20/e17f078982b70355f1c65d0ec05055a7.jpeg) |
+|  帖子页  |   ![post-original](https://i2.mjj.rip/2024/06/09/680ba5614763c3892fc8a428b6f7882b.png)   |      ![post-modified](https://i2.mjj.rip/2024/06/09/c20a7c4409955b35ef9c6e6891bb2bda.png)       |
+|  搜索页  |  ![search-original](https://i2.mjj.rip/2024/06/09/1c44aefa234a154cd35e2ed6a1e08919.png)  |     ![search-modified](https://i2.mjj.rip/2024/06/09/34abe7d69aab99b2154f9358b85cb1ec.png)      |
+| 个人信息页 | ![profile-original](https://i2.mjj.rip/2024/06/09/a38614bcea66a901ea12108bb9decbb4.png)  |     ![profile-modified](https://i2.mjj.rip/2024/06/09/6bbfb55ad33f342da511fe1930f30379.png)     |
+|  收藏页  | ![favorite-original](https://i2.mjj.rip/2024/06/09/b0c7490064452260fcc8288d552d42b4.png) |    ![favorite-modified](https://i2.mjj.rip/2024/06/09/8209f2e6e656772f15d419423d7cf002.png)     |
 
 ## 使用方法
 
-1. 首先确保使用的浏览器支持安装插件(如[Kiwi Browser](https://kiwibrowser.com/))，且已安装[Tampermonkey](https://www.tampermonkey.net/)或其他同类插件管理器。
+1. 使用可以安装插件的浏览器(如[Kiwi Browser](https://kiwibrowser.com/))+脚本管理器(如[Tampermonkey](https://www.tampermonkey.net/))，或使用可以直接使用脚本的浏览器(如[Via](https://viayoo.com/zh-cn/))
 2. 转到Sleazy Fork的脚本页面：[JavBus论坛移动端界面适配](https://sleazyfork.org/zh-CN/scripts/472169-javbus论坛移动端界面适配)
 3. 点击“安装此脚本”按钮
 4. 在弹出窗口点击“安装”按钮
@@ -50,3 +51,9 @@
 * 采用`querySelector`和`querySelectorAll`代替`getElementById`和`getElementsByClassName`，减少代码量
 * 适配个人信息页和收藏页
 * 修复了一些界面中的样式问题
+
+### 2024-07-20 v1.3
+
+* 修复了误将子版块识别为index页，导致错误应用规则导致的问题。
+* 适配子版块页
+* 页面类型匹配规则更加合理，当页面类型不匹配时不会应用样式
