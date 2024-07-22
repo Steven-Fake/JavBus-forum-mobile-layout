@@ -57,3 +57,7 @@
 * 修复了误将子版块识别为index页，导致错误应用规则导致的问题。
 * 适配子版块页
 * 页面类型匹配规则更加合理，当页面类型不匹配时不会应用样式
+
+### 2024-07-22 v1.3.1
+
+* [[Issue#3]](https://github.com/Steven-Fake/JavBus-forum-mobile-layout/issues/3)修复了在iOS版Via浏览器中不执行的问题(需要显式声明脚本运行时机)

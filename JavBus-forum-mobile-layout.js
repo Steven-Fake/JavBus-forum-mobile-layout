@@ -2,10 +2,11 @@
 // @name         JavBus论坛移动端界面适配
 // @namespace    https://sleazyfork.org/zh-CN/users/1140711-steven-fake
 // @homepageURL  https://github.com/Steven-Fake/JavBus-forum-mobile-layout
-// @version      1.3
+// @version      1.3.1
 // @license      MIT
 // @description  使司机社(JavBus)的论坛适应移动端界面
 // @author       Steven-Fake
+// @run-at       document-idle
 // @icon         https://www.javbus.com/favicon.ico
 // @match        https://www.javbus.com/forum*
 // @match        https://www.buscdn.cfd/forum*
@@ -35,7 +36,7 @@ PAGE = {//页面枚举类型
     Login: 6, // 登录页面
     Unknown: -1 // 未知，或未适配的页面
 }
-const VERSION = "1.3"
+const VERSION = "1.3.1"
 const SLEAZYFORK = "https://sleazyfork.org/zh-CN/scripts/472169-javbus论坛移动端界面适配"; // 脚本主页
 
 /**
