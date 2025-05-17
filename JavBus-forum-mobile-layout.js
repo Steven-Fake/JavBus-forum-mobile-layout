@@ -2,7 +2,7 @@
 // @name         JavBus论坛移动端界面适配
 // @namespace    https://sleazyfork.org/zh-CN/users/1140711-steven-fake
 // @homepageURL  https://github.com/Steven-Fake/JavBus-forum-mobile-layout
-// @version      1.3.1
+// @version      1.3.2
 // @license      MIT
 // @description  使司机社(JavBus)的论坛适应移动端界面
 // @author       Steven-Fake
@@ -24,9 +24,11 @@
 // @match        https://www.seejav.cfd/forum*
 // @match        https://www.seejav.lol/forum*
 // @grant        none
+// @downloadURL https://update.sleazyfork.org/scripts/472169/JavBus%E8%AE%BA%E5%9D%9B%E7%A7%BB%E5%8A%A8%E7%AB%AF%E7%95%8C%E9%9D%A2%E9%80%82%E9%85%8D.user.js
+// @updateURL https://update.sleazyfork.org/scripts/472169/JavBus%E8%AE%BA%E5%9D%9B%E7%A7%BB%E5%8A%A8%E7%AB%AF%E7%95%8C%E9%9D%A2%E9%80%82%E9%85%8D.meta.js
 // ==/UserScript==
 
-PAGE = {//页面枚举类型
+const PAGE = {//页面枚举类型
     Index: 0, // 首页
     SubForum: 1, // 子版块页面
     Post: 2, // 帖子页面
@@ -34,9 +36,11 @@ PAGE = {//页面枚举类型
     Favorite: 4, // 收藏页面
     Profile: 5, // 个人信息页面
     Login: 6, // 登录页面
+    Message: 7, // 消息页面
+    Privacy: 8, // 隐私设置页面
     Unknown: -1 // 未知，或未适配的页面
 }
-const VERSION = "1.3.1"
+const VERSION = "1.3.2"
 const SLEAZYFORK = "https://sleazyfork.org/zh-CN/scripts/472169-javbus论坛移动端界面适配"; // 脚本主页
 
 /**
@@ -75,40 +79,10 @@ function getPageType() {
     else if (url.includes("uid=")) return PAGE.Profile;
     else if (url.includes("action=login")) return PAGE.Login;
     else if (url.includes("search.php")) return PAGE.Search;
+    else if (url.includes("ac=privacy")) return PAGE.Privacy;
+    else if (url.includes("mod=space")) return PAGE.Message;
     else if (url.includes("do=favorite")) return PAGE.Favorite;
     else return PAGE.Unknown;
-}
-
-
-function getFeedbackInfo(e) {
-    if (e) {
-        return `
-        Version: ${VERSION}
-        URL    : ${window.location.href}
-        UA     : ${navigator.userAgent}
-        Error  : 
-            ${e.name} - ${e.message}
-        `
-    } else {
-        return `
-        Version: ${VERSION}
-        URL    : ${window.location.href}
-        UA     : ${navigator.userAgent}
-        `
-    }
-}
-
-/**
- * 对于出错的页面是否进行反馈
- */
-function copyFeedbackToClipboard(e) {
-    try {
-        window.focus();
-        navigator.clipboard.writeText(getFeedbackInfo(e));
-        return true;
-    } catch (error) {
-        return false;
-    }
 }
 
 /**
@@ -122,24 +96,10 @@ class Layout {
         meta.content = "width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no";
         document.head.appendChild(meta);
 
-        this.pageType = getPageType();
+        this.pageType = getPageType(); // 页面类型
 
         if (this.pageType === PAGE.Unknown) { // 未适配的页面
-            if ("Notification" in window) { // 当前环境存在Notification API
-                Notification.requestPermission().then(permission => {
-                    if (permission === "granted") {
-                        const notification = new Notification("JavBus论坛移动端界面适配 v" + VERSION, {
-                            body: copyFeedbackToClipboard() ? "尚未适配当前页面，已复制相关信息到剪贴板，点击可进行反馈。" : "尚未适配当前页面，点击可进行反馈。",
-                            icon: "https://www.javbus.com/favicon.ico"
-                        });
-                        notification.onclick = () => {
-                            window.open(`${SLEAZYFORK}/feedback`)
-                        };
-                    } // 用户拒绝了通知权限请求
-                });
-            } else {
-                console.log("JavBus论坛移动端界面适配 v" + VERSION + ": 未适配当前页面")
-            }
+            console.log("JavBus论坛移动端界面适配 v" + VERSION + ": 未适配当前页面")
             return;
         } else if (this.pageType !== PAGE.Search) { // 执行通用规则，但搜索页面不适用
             this.mainWrapper = document.querySelector("#wp");
@@ -162,6 +122,10 @@ class Layout {
             this.login(); // 调整登录页面
         } else if (this.pageType === PAGE.Favorite) {
             this.favorite(); // 调整收藏页面
+        } else if (this.pageType === PAGE.Message) {
+            this.message(); // 调整消息页面
+        } else if (this.pageType === PAGE.Privacy) {
+            this.privacy(); // 调整隐私设置页面
         }
     }
 
@@ -180,14 +144,14 @@ class Layout {
 
         // 4.调整回到页首按钮的位置
         const backToTop = document.getElementsByClassName("biaoqi-fix-area");
-        if (backToTop.length > 0) {
+        if (backToTop[0]) {
             backToTop[0].style.cssText = "left: 0; margin-left: 80%;"
             backToTop[0].firstElementChild.style.bottom = "10%";
         }
 
         // 5.调整页脚样式
         const footer = document.getElementsByClassName("jav-footer");
-        if (footer.length > 0) {
+        if (footer[0]) {
             footer[0].style.cssText = "width: 100%; min-width: 0; padding: 0;";
             footer[0].firstElementChild.style.padding = "10px";
         }
@@ -221,7 +185,7 @@ class Layout {
         // 4. 调整个人信息部分
         const member = nav.querySelector('div.login-wrap.y');
         // 4.1 移除ID以节省空间
-        member.querySelector('span.member-name')?.remove();
+        member?.querySelector('span.member-name')?.remove();
         // 4.2 个人头像改为左对齐
         member.style.cssText = "float: left;";
         // 4.3 将下拉菜单搬出来
@@ -252,12 +216,17 @@ class Layout {
         // 第1部分，包括轮播图片和帖子推荐列表
         const part1 = this.mainContainer.firstElementChild;
         part1.style.cssText = "width: 100%; min-width: 0; padding: 0; height: auto;"; // 调整样式
-
         const carouselContainer = part1.children[0], postListContainer = part1.children[1];
         carouselContainer.style.cssText = "float: none; width: 100%; height: auto;"; // 调整轮播图片框的样式
         postListContainer.style.cssText = "margin: 0; margin-top: 10px; width: 100%; height: auto;"; // 调整帖子列表框的样式
         // 轮播图片框
         carouselContainer.querySelectorAll("img").forEach(e => e.style.width = "100%");
+        // 轮播指示器
+        const carouselIndicator = carouselContainer.querySelector("div.biaoqicn_show.slidebar");
+        if (carouselIndicator) {
+            carouselIndicator.style.cssText = "width: 100%; left: 0; top: 0";
+            carouselIndicator.querySelectorAll("a").forEach(e => e.style.cssText = "margin:0; padding: 10px 0; width: 10%;");
+        }
         // 帖子推荐列表
         const postLists = postListContainer.querySelectorAll("div.sideMenu");
         for (let sideMenu of postLists) {
@@ -366,7 +335,7 @@ class Layout {
      * 帖子页面(javbus.com/forum.php?mod=viewthread&tid=)
      */
     post() {
-        // 1.调整帖子和回复中的图片尺寸
+        // 调整帖子和回复中的图片尺寸
         let post_td = document.getElementsByClassName("t_f");
         for (let i = 0; i < post_td.length; i++) {
             let imgs = post_td[i].getElementsByTagName("img");
@@ -376,8 +345,14 @@ class Layout {
                 }
             }
         }
+        // 微调楼主信息卡片
+        const actionTabs = document.querySelector("div.biaoqi_pls")
+        if (actionTabs) {
+            actionTabs.style.width = "100%";
+            actionTabs.firstElementChild.style.width = "100%";
+        }
 
-        // 2.“精选内容”与“精选主题”
+        // “精选内容”与“精选主题”
         const sidebar = this.mainWrapper.querySelector("div.sd.sd_allbox");
         sidebar.style.cssText = "width: 100%; min-width: 0;";
         sidebar.querySelectorAll("div.main-right-box.cl").forEach(e => e.style.cssText = "width: 100%; min-width: 0; padding: 0;"); // 调整每个帖子的样式
@@ -410,7 +385,9 @@ class Layout {
      * 搜索页面(javbus.com/forum/search.php)
      */
     search() {
-        const searchForm = document.getElementById("scform");
+        // 删除Logo
+        document.querySelector("h1")?.remove();
+        const searchForm = document.querySelector("#scform");
         if (searchForm) {
             searchForm.style.cssText += "width: 100%; min-width: 0;";//调整搜索框的宽度
             searchForm.querySelector("input#scform_srchtxt").style.width = "100%";
@@ -499,6 +476,23 @@ class Layout {
 
         // 调整全选按钮的样式
         this.mainContainer.querySelector("p.mtm.pns").style.padding = "10px";
+    }
+
+    /**
+     * 消息页面(javbus.com/forum/home.php?mod=space&do=pm)
+     */
+    message() {
+        const sider_ct = document.querySelector("div#ct")
+        sider_ct.style.cssText = "background: none; display: flex; flex-direction: column-reverse;";
+        // TODO: 由于账号暂时没有发消息的权限，所以这里是空的，效果不一定行
+    }
+
+    /**
+     * 隐私设置页面(javbus.com/forum/home.php?mod=spacecp&ac=privacy)
+     */
+    privacy() {
+        const sider_ct = document.querySelector("div#ct")
+        sider_ct.style.cssText = "background: none; display: flex; flex-direction: column-reverse;";
     }
 }
 
