@@ -61,3 +61,8 @@
 ### 2024-07-22 v1.3.1
 
 * [[Issue#3]](https://github.com/Steven-Fake/JavBus-forum-mobile-layout/issues/3)修复了在iOS版Via浏览器中不执行的问题(需要显式声明脚本运行时机)
+
+### 2025-05-17 v1.3.2
+
+* 优化首页和帖子详情页的部分细节
+* [[Issue#5]](https://github.com/Steven-Fake/JavBus-forum-mobile-layout/issues/5)尚未修复，原因是我的账号权限还不够，不能回帖和发帖，也没有任何消息，这个等有权限了再修改吧....
